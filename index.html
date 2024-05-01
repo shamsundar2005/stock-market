@@ -9,13 +9,16 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f4f4f4; /* Fallback color */
+            background-image: url('https://www.shutterstock.com/image-photo/stock-market-forex-trading-graph-260nw-416888221.jpg'); /* Background image URL */
+            background-size: cover; /* Cover the entire viewport */
+            background-position: center; /* Center the background image */
         }
         .container {
             max-width: 800px;
             margin: 20px auto;
             padding: 20px;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
