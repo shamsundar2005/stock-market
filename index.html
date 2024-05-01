@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Price Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"] {
+            width: calc(100% - 100px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        canvas {
+            display: block;
+            margin-top: 20px;
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Stock Price Viewer</h2>
+        <form id="stockForm">
+            <input type="text" id="symbol" placeholder="Enter stock symbol (e.g., AAPL)">
+            <input type="submit" value="Get Price">
+        </form>
+        <div id="result"></div>
+        <canvas id="chart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.getElementById('stockForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var symbol = document.getElementById('symbol').value.toUpperCase();
+            var apiKey = 'ZK58MRPX3AVHT6RU'; // Replace with your Alpha Vantage API key
+
+            fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`)
+            .then(response => response.json())
+            .then(data => {
+                var resultDiv = document.getElementById('result');
+                if(data['Error Message']) {
+                    resultDiv.innerHTML = `<p style="color: red;">${data['Error Message']}</p>`;
+                } else {
+                    var timeSeries = data['Time Series (Daily)'];
+                    var dates = Object.keys(timeSeries);
+                    var prices = dates.map(date => parseFloat(timeSeries[date]['4. close']));
+
+                    // Display table
+                    var tableHTML = `
+                        <table>
+                            <tr>
+                                <th>Date</th>
+                                <th>Close Price</th>
+                            </tr>
+                    `;
+                    for(var i = 0; i < dates.length; i++) {
+                        tableHTML += `
+                            <tr>
+                                <td>${dates[i]}</td>
+                                <td>${prices[i]}</td>
+                            </tr>
+                        `;
+                    }
+                    tableHTML += `</table>`;
+                    resultDiv.innerHTML = tableHTML;
+
+                    // Display chart
+                    var ctx = document.getElementById('chart').getContext('2d');
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: dates,
+                            datasets: [{
+                                label: 'Closing Price',
+                                data: prices,
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: false
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
